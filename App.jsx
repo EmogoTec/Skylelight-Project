@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StatusBar, ActivityIndicator, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { 
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
   useFonts,
   Poppins_400Regular,
   Poppins_500Medium,
@@ -14,10 +15,11 @@ import SignupPhoneScreen from './src/screens/SignupPhoneScreen';
 import SignupOtpScreen from './src/screens/SignupOtpScreen';
 import SignupDetailsScreen from './src/screens/SignupDetailsScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('login'); // 'login', 'signup_phone', 'signup_otp', 'signup_details', 'dashboard'
-
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -27,44 +29,26 @@ export default function App() {
 
   if (!fontsLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
         <ActivityIndicator size="large" color="#18C9E8" />
       </View>
     );
   }
 
   return (
-    <SafeAreaProvider>
+    <NavigationContainer>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
-      {currentScreen === 'login' && (
-        <LoginScreen 
-          onLoginSuccess={() => setCurrentScreen('dashboard')} 
-          onNavigateSignup={() => setCurrentScreen('signup_phone')} 
-        />
-      )}
-      {currentScreen === 'signup_phone' && (
-        <SignupPhoneScreen 
-          onBack={() => setCurrentScreen('login')}
-          onContinue={() => setCurrentScreen('signup_otp')}
-          onLoginLink={() => setCurrentScreen('login')}
-        />
-      )}
-      {currentScreen === 'signup_otp' && (
-        <SignupOtpScreen 
-          onBack={() => setCurrentScreen('signup_phone')}
-          onContinue={() => setCurrentScreen('signup_details')}
-        />
-      )}
-      {currentScreen === 'signup_details' && (
-        <SignupDetailsScreen 
-          onBack={() => setCurrentScreen('signup_otp')}
-          onSuccess={() => setCurrentScreen('dashboard')}
-          onLoginLink={() => setCurrentScreen('login')}
-        />
-      )}
-      {currentScreen === 'dashboard' && (
-        <DashboardScreen onLogout={() => setCurrentScreen('login')} />
-      )}
-    </SafeAreaProvider>
+      <Stack.Navigator
+        initialRouteName="Login"
+        screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
+      >
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SignupPhone" component={SignupPhoneScreen} />
+        <Stack.Screen name="SignupOtp" component={SignupOtpScreen} />
+        <Stack.Screen name="SignupDetails" component={SignupDetailsScreen} />
+        <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ gestureEnabled: false }} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

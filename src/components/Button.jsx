@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, View, StyleSheet, ActivityIndicator } from 'react-native';
 import { theme } from '../theme/theme';
 
 export default function Button({ 
@@ -9,7 +9,9 @@ export default function Button({
   style, 
   textStyle, 
   disabled, 
-  loading 
+  loading,
+  rightIcon,
+  leftIcon,
 }) {
   const isPrimary = variant === 'primary';
   const isSecondary = variant === 'secondary';
@@ -25,7 +27,7 @@ export default function Button({
 
   const getTextColor = () => {
     if (disabled) return theme.colors.textLight;
-    if (isOutline) return theme.colors.primary;
+    if (isOutline) return theme.colors.navy;
     return theme.colors.white;
   };
 
@@ -44,9 +46,13 @@ export default function Button({
       {loading ? (
         <ActivityIndicator color={getTextColor()} />
       ) : (
-        <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
-          {title}
-        </Text>
+        <View style={styles.contentRow}>
+          {leftIcon && <View style={styles.iconWrapper}>{leftIcon}</View>}
+          <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
+            {title}
+          </Text>
+          {rightIcon && <View style={styles.iconWrapper}>{rightIcon}</View>}
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -55,7 +61,7 @@ export default function Button({
 const styles = StyleSheet.create({
   button: {
     height: 56,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: theme.spacing.lg,
@@ -63,7 +69,16 @@ const styles = StyleSheet.create({
   },
   outlineStyle: {
     borderWidth: 1.5,
-    borderColor: theme.colors.primary,
+    borderColor: theme.colors.navy,
+  },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: {
     fontFamily: theme.typography.fontFamily.semiBold,

@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Animated, Easing, StatusBar, Image, Modal, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { Text, View, ScrollView, TouchableOpacity, Image, Modal, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Phone, Lock, Eye, EyeOff, Check, ArrowRight, Fingerprint, UserPlus } from 'lucide-react-native';
 import { theme } from '../theme/theme';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import AuthBackground from '../components/AuthBackground';
+import { authStyles } from '../styles/authStyles';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 let AsyncStorage = {
   setItem: async () => {},
@@ -18,9 +21,7 @@ try {
   console.log('AsyncStorage fallback enabled.');
 }
 
-import { authStyles } from '../styles/authStyles';
-
-export default function LoginScreen({ onLoginSuccess, onNavigateSignup }) {
+export default function LoginScreen({ navigation }) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -28,26 +29,35 @@ export default function LoginScreen({ onLoginSuccess, onNavigateSignup }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const [showBiometricModal, setShowBiometricModal] = useState(false);
-  const [biometricLoading, setBiometricLoading] = useState(false);
-
-  const handleOpenBiometricPrompt = () => {
+  const handleBiometricLogin = async () => {
     setError('');
-    setShowBiometricModal(true);
-  };
-
-  const handleConfirmBiometricScan = async () => {
     try {
-      setBiometricLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      await AsyncStorage.setItem('userToken', 'skylelight_secure_token_biometric');
-      setShowBiometricModal(false);
-      setBiometricLoading(false);
-      if (onLoginSuccess) onLoginSuccess();
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!hasHardware || !isEnrolled) {
+        setError('Biometrics not available or not enrolled on this device.');
+        return;
+      }
+
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Sign into SkyleLight',
+        fallbackLabel: 'Use Passcode',
+        disableDeviceFallback: false,
+      });
+
+      if (result.success) {
+        setLoading(true);
+        // Simulate a tiny network delay for realism
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        await AsyncStorage.setItem('userToken', 'skylelight_secure_token_biometric');
+        navigation.replace('Dashboard');
+      } else {
+        setError('Authentication cancelled or failed.');
+      }
     } catch (e) {
-      setBiometricLoading(false);
-      setShowBiometricModal(false);
-      setError('Biometric authentication failed.');
+      setError('An error occurred during biometric authentication.');
+      console.log(e);
     }
   };
 
@@ -61,7 +71,7 @@ export default function LoginScreen({ onLoginSuccess, onNavigateSignup }) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       await AsyncStorage.setItem('userToken', 'skylelight_token_auth');
-      if (onLoginSuccess) onLoginSuccess();
+      navigation.replace('Dashboard');
     } catch (err) {
       setError('Login failed. Please check your credentials.');
     } finally {
@@ -69,7 +79,6 @@ export default function LoginScreen({ onLoginSuccess, onNavigateSignup }) {
     }
   };
 
-  // Wrapper component for Eye icon to handle press
   const PasswordRightIcon = () => (
     <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
       {showPassword ? <Eye size={20} color={theme.colors.textLight} /> : <EyeOff size={20} color={theme.colors.textLight} />}
@@ -78,11 +87,7 @@ export default function LoginScreen({ onLoginSuccess, onNavigateSignup }) {
 
   return (
     <View style={authStyles.outerContainer}>
-      <View style={authStyles.headerGraphicContainer} pointerEvents="none">
-        <View style={authStyles.abstractBlobOne} />
-        <View style={authStyles.abstractBlobTwo} />
-      </View>
-
+      <AuthBackground />
       <KeyboardAvoidingView 
         style={authStyles.container} 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -94,131 +99,83 @@ export default function LoginScreen({ onLoginSuccess, onNavigateSignup }) {
         >
           <View style={authStyles.headerContainer}>
             <Image source={require('../../assets/icon.png')} style={authStyles.logo} resizeMode="contain" />
-            <View>
-              <Text style={authStyles.brandTitleText}>SkyleLight</Text>
-              <Text style={authStyles.brandTaglineText}>Data • Airtime • Payments • Investments</Text>
-            </View>
+            <Text style={authStyles.brandTitleText}>SkyleLight</Text>
+            <Text style={authStyles.brandTaglineText}>Lighting the way to possibilities</Text>
           </View>
 
-          <View style={authStyles.contentBox}>
-            <Text style={authStyles.title}>Sign In</Text>
-            <Text style={authStyles.subtitle}>Sign into your SkyleLight account and enjoy seamless vtu services.</Text>
+          <Text style={authStyles.title}>Sign In</Text>
+          <Text style={authStyles.subtitle}>Sign into your SkyleLight account and enjoy seamless vtu services.</Text>
             
-            {error ? <Text style={authStyles.errorText}>{error}</Text> : null}
+          {error ? <Text style={authStyles.errorText}>{error}</Text> : null}
 
-            <Input
-              placeholder="Email or Phone Number"
-              value={identifier}
-              onChangeText={setIdentifier}
-              editable={!loading}
-              leftIcon={Phone}
-            />
+          <Input
+            placeholder="Email or Phone Number"
+            value={identifier}
+            onChangeText={setIdentifier}
+            editable={!loading}
+            leftIcon={Phone}
+          />
 
-            <Input
-              placeholder="Password"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-              editable={!loading}
-              leftIcon={Lock}
-              rightIcon={PasswordRightIcon}
-            />
+          <Input
+            placeholder="Password"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+            editable={!loading}
+            leftIcon={Lock}
+            rightIcon={PasswordRightIcon}
+          />
 
-            <View style={authStyles.optionsRow}>
-              <TouchableOpacity 
-                style={authStyles.rememberContainer} 
-                activeOpacity={0.8}
-                onPress={() => setRememberMe(!rememberMe)}
-              >
-                <View style={[authStyles.checkboxBox, rememberMe && authStyles.checkboxChecked]}>
-                  {rememberMe && <Check size={12} color={theme.colors.white} />}
-                </View>
-                <Text style={authStyles.rememberText}>Remember me</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => {}}>
-                <Text style={authStyles.forgotText}>Forgot Password?</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Button 
-              title="Sign In" 
-              onPress={handlePasswordLogin} 
-              loading={loading} 
-            />
-
+          <View style={authStyles.optionsRow}>
             <TouchableOpacity 
-              style={authStyles.biometricButton} 
-              onPress={handleOpenBiometricPrompt}
-              disabled={loading}
+              style={authStyles.rememberContainer} 
+              activeOpacity={0.8}
+              onPress={() => setRememberMe(!rememberMe)}
             >
-              <View style={authStyles.biometricIconBadge}>
-                <Fingerprint size={16} color={theme.colors.primary} />
+              <View style={[authStyles.checkboxBox, rememberMe && authStyles.checkboxChecked]}>
+                {rememberMe && <Check size={12} color={theme.colors.white} />}
               </View>
-              <Text style={authStyles.biometricButtonText}>Sign in with Fingerprint</Text>
-              <View style={authStyles.secureBadgeTag}>
-                <Text style={authStyles.secureBadgeText}>Fast & Secure</Text>
-              </View>
+              <Text style={authStyles.rememberText}>Remember me</Text>
             </TouchableOpacity>
 
-            <View style={authStyles.accountFooterDivider} />
-            
-            <View style={authStyles.footerContainer}>
-              <Text style={authStyles.footerText}>Don't have an account?</Text>
-              <TouchableOpacity style={authStyles.createAccountOutlineBtn} onPress={onNavigateSignup} activeOpacity={0.8}>
-                <UserPlus size={15} color={theme.colors.primary} />
-                <Text style={authStyles.linkText}>Create Account</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={authStyles.brandFooterBlock}>
-              <Text style={authStyles.companyFooterText}>SkyleLight Technologies Ltd</Text>
-              <Text style={authStyles.sloganFooterText}>Lighting the way to possibilities</Text>
-            </View>
+            <TouchableOpacity onPress={() => {}}>
+              <Text style={authStyles.forgotText}>Forgot Password?</Text>
+            </TouchableOpacity>
           </View>
+
+          <Button 
+            title="Sign In" 
+            onPress={handlePasswordLogin} 
+            loading={loading}
+            rightIcon={<ArrowRight size={18} color={theme.colors.white} />}
+          />
+
+          <TouchableOpacity 
+            style={authStyles.biometricButton} 
+            onPress={handleBiometricLogin}
+            disabled={loading}
+          >
+            <View style={authStyles.biometricIconBadge}>
+              <Fingerprint size={16} color={theme.colors.primary} />
+            </View>
+            <Text style={authStyles.biometricButtonText}>Continue with Biometrics</Text>
+            <View style={authStyles.secureBadgeTag}>
+              <Text style={authStyles.secureBadgeText}>Fast & Secure</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={authStyles.accountFooterDivider} />
+          
+          <View style={{ alignItems: 'center', marginBottom: 8 }}>
+            <Text style={authStyles.footerText}>Don't have an account?</Text>
+          </View>
+          <TouchableOpacity style={authStyles.createAccountOutlineBtn} onPress={() => navigation.navigate('SignupPhone')} activeOpacity={0.8}>
+            <UserPlus size={15} color={theme.colors.navy} />
+            <Text style={authStyles.linkText}>Create Account</Text>
+          </TouchableOpacity>
         </ScrollView>
-
-        <Modal
-          visible={showBiometricModal}
-          transparent={true}
-          animationType="fade"
-        >
-          <View style={authStyles.modalOverlay}>
-            <View style={authStyles.modalContent}>
-              <Text style={authStyles.modalTitle}>Biometric Authentication</Text>
-              <Text style={authStyles.modalSubtitle}>Touch the fingerprint sensor on your device to sign in securely.</Text>
-
-              <TouchableOpacity 
-                style={authStyles.fingerprintIconCircle} 
-                onPress={handleConfirmBiometricScan}
-                disabled={biometricLoading}
-                activeOpacity={0.8}
-              >
-                {biometricLoading ? (
-                  <ActivityIndicator size="large" color={theme.colors.primary} />
-                ) : (
-                  <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                    <Fingerprint size={42} color={theme.colors.primary} />
-                    <View style={authStyles.fingerprintRingPulse} />
-                  </View>
-                )}
-              </TouchableOpacity>
-
-              <Text style={authStyles.tapInstructionText}>
-                {biometricLoading ? "Verifying fingerprint..." : "Tap fingerprint icon to simulate scan"}
-              </Text>
-
-              <TouchableOpacity 
-                style={authStyles.modalCancelButton}
-                onPress={() => setShowBiometricModal(false)}
-                disabled={biometricLoading}
-              >
-                <Text style={authStyles.modalCancelText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </KeyboardAvoidingView>
+
     </View>
   );
 }

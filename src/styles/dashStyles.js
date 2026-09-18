@@ -11,9 +11,8 @@ export const dashStyles = StyleSheet.create({
   brandTitle: { fontSize: 18, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.navy },
   
   headerRightActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  headerIconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.colors.iceBlue, justifyContent: 'center', alignItems: 'center' },
-  headerLogoutBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#FFEBEE', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#FFCDD2' },
   profileAvatarBadge: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center' },
+  profileInitials: { color: theme.colors.white, fontFamily: theme.typography.fontFamily.bold, fontSize: 13 },
   profileInitials: { color: theme.colors.white, fontFamily: theme.typography.fontFamily.bold, fontSize: 13 },
   
   tickerContainer: { backgroundColor: theme.colors.iceBlue, paddingVertical: 8, overflow: 'hidden', borderBottomWidth: 1, borderBottomColor: theme.colors.border },
@@ -36,36 +35,48 @@ export const dashStyles = StyleSheet.create({
   verifyButtonText: { color: theme.colors.white, fontSize: 12, fontFamily: theme.typography.fontFamily.bold },
   
   walletCard: { marginHorizontal: 18, marginTop: 14, borderRadius: theme.borderRadius.xl, padding: 20, shadowColor: theme.colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 6 },
-  walletHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  walletHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   walletSectionTitle: { fontSize: 13, color: theme.colors.cloudWhite, fontFamily: theme.typography.fontFamily.medium },
-  viewHistoryLink: { fontSize: 12, color: theme.colors.white, fontFamily: theme.typography.fontFamily.bold, flexDirection: 'row', alignItems: 'center' },
-  
-  balanceDisplayRow: { marginTop: 10, marginBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  mainBalanceText: { fontSize: 32, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.white },
   eyeToggleBtn: { padding: 4 },
   
-  walletActionsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  walletActionButton: { flex: 1, backgroundColor: 'rgba(255,255,255,0.2)', height: 44, borderRadius: theme.borderRadius.md, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
-  walletActionText: { color: theme.colors.white, fontFamily: theme.typography.fontFamily.semiBold, fontSize: 14 },
+  mainBalanceText: { fontSize: 36, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.white, marginTop: 4, marginBottom: 20 },
   
-  miniTxBox: { backgroundColor: 'rgba(255, 255, 255, 0.15)', borderRadius: 12, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
-  miniTxIconBox: { width: 36, height: 36, borderRadius: 18, backgroundColor: theme.colors.white, justifyContent: 'center', alignItems: 'center' },
-  miniTxTitle: { fontSize: 12, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.white },
-  miniTxDate: { fontSize: 10, color: 'rgba(255,255,255,0.8)', marginTop: 2, fontFamily: theme.typography.fontFamily.regular },
-  miniTxAmount: { fontSize: 12, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.success },
+  walletBalanceCols: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
+  walletSubCol: { flex: 1 },
+  walletSubLabel: { fontSize: 11, color: theme.colors.cloudWhite, fontFamily: theme.typography.fontFamily.medium, marginBottom: 4 },
+  walletSubValue: { fontSize: 14, color: theme.colors.white, fontFamily: theme.typography.fontFamily.bold },
+  walletColDivider: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.3)', marginHorizontal: 16 },
+
+  quickActionsContainer: { flexDirection: 'row', marginHorizontal: 18, marginTop: 16, gap: 16 },
+  quickActionBtn: { flex: 1, backgroundColor: theme.colors.white, height: 48, borderRadius: theme.borderRadius.lg, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: theme.colors.border, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 2 },
+  quickActionText: { color: theme.colors.primary, fontFamily: theme.typography.fontFamily.bold, fontSize: 15 },
   
-  metricsRow: { flexDirection: 'row', backgroundColor: 'rgba(0, 0, 0, 0.1)', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 12, justifyContent: 'space-between', alignItems: 'center' },
-  metricItem: { flex: 1, alignItems: 'center' },
-  metricLabel: { fontSize: 10, color: 'rgba(255,255,255,0.8)', marginBottom: 4, fontFamily: theme.typography.fontFamily.medium },
-  metricIncomeVal: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.white },
-  metricExpenseVal: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: '#FFCDD2' }, // Soft red on blue bg
-  metricDivider: { width: 1, height: '80%', backgroundColor: 'rgba(255,255,255,0.2)' },
+  recentTxContainer: { marginHorizontal: 18, marginTop: 24 },
+  recentTxHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  recentTxTitle: { fontSize: 16, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.navy },
+  recentTxSeeAll: { fontSize: 12, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.primary },
+  
+  txItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.white, padding: 12, borderRadius: theme.borderRadius.lg, marginBottom: 12, borderWidth: 1, borderColor: theme.colors.border },
+  txIconWrapper: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  txDetails: { flex: 1 },
+  txTitle: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.navy, marginBottom: 2 },
+  txSubtitle: { fontSize: 11, color: theme.colors.textLight, fontFamily: theme.typography.fontFamily.regular },
+  txDate: { fontSize: 10, color: theme.colors.textLight, marginTop: 2, fontFamily: theme.typography.fontFamily.regular },
+  txAmountContainer: { alignItems: 'flex-end' },
+  txAmountNegative: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: '#E53E3E', marginBottom: 4 },
+  txAmountPositive: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.success, marginBottom: 4 },
+  txStatusPill: { backgroundColor: '#F0FDF4', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, borderWidth: 1, borderColor: '#DCFCE7' },
+  txStatusText: { fontSize: 10, color: theme.colors.success, fontFamily: theme.typography.fontFamily.medium },
   
   servicesContainer: { marginHorizontal: 18, marginTop: 14, backgroundColor: theme.colors.white, borderRadius: theme.borderRadius.lg, padding: 16, borderWidth: 1, borderColor: theme.colors.border },
   servicesHeader: { marginBottom: 16 },
   servicesMainTitle: { fontSize: 18, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.navy },
   servicesSubTitle: { fontSize: 12, color: theme.colors.textLight, marginTop: 2, fontFamily: theme.typography.fontFamily.regular },
-  servicesGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 16 },
+  servicesGrid: { gap: 20 },
+  servicesRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  serviceCardItem: { flex: 1, alignItems: 'center', paddingHorizontal: 2 },
+  serviceIconCircle: { width: 52, height: 52, borderRadius: 26, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+  serviceItemLabel: { fontSize: 11, fontFamily: theme.typography.fontFamily.medium, color: theme.colors.navy, textAlign: 'center', lineHeight: 14 },
   
   referralCard: { marginHorizontal: 18, marginTop: 14, backgroundColor: theme.colors.navy, borderRadius: theme.borderRadius.lg, padding: 16 },
   referralCardTitle: { fontSize: 17, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.white, marginBottom: 4 },
@@ -81,7 +92,13 @@ export const dashStyles = StyleSheet.create({
   fullLogoutButton: { backgroundColor: '#E53E3E', height: 46, borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 },
   fullLogoutButtonText: { color: theme.colors.white, fontSize: 14, fontFamily: theme.typography.fontFamily.bold },
   
-  bottomNavBar: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: theme.colors.white, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', borderTopWidth: 1, borderTopColor: theme.colors.border, elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+  bottomNavBar: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: theme.colors.white, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', borderTopWidth: 1, borderTopColor: theme.colors.border, elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.08, shadowRadius: 8 },
+  
+  bottomNavTab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  bottomNavText: { fontSize: 10, color: theme.colors.textLight, marginTop: 4, fontFamily: theme.typography.fontFamily.medium },
+  bottomNavTextActive: { color: theme.colors.primary, fontFamily: theme.typography.fontFamily.bold },
+  
+  centerTabButton: { width: 56, height: 56, borderRadius: 28, backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center', marginTop: -24, shadowColor: theme.colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 },
   
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalContent: { width: '85%', maxWidth: 340, backgroundColor: theme.colors.white, borderRadius: theme.borderRadius.xl, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 8 },
