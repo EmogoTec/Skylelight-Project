@@ -14,8 +14,11 @@ import LoginScreen from './src/screens/LoginScreen';
 import SignupPhoneScreen from './src/screens/SignupPhoneScreen';
 import SignupOtpScreen from './src/screens/SignupOtpScreen';
 import SignupDetailsScreen from './src/screens/SignupDetailsScreen';
+import BiometricScreen from './src/screens/BiometricScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import HistoryScreen from './src/screens/HistoryScreen';
+import SeeAllScreen from './src/screens/SeeAllScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,8 +49,11 @@ export default function App() {
         <Stack.Screen name="SignupPhone" component={SignupPhoneScreen} />
         <Stack.Screen name="SignupOtp" component={SignupOtpScreen} />
         <Stack.Screen name="SignupDetails" component={SignupDetailsScreen} />
+        <Stack.Screen name="Biometric" component={BiometricScreen} options={{ gestureEnabled: false }} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ gestureEnabled: false }} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="History" component={HistoryScreen} />
+        <Stack.Screen name="SeeAll" component={SeeAllScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

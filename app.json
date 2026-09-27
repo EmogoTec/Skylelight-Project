@@ -1,15 +1,17 @@
 {
   "expo": {
     "name": "SkyleLight",
-    "slug": "SkyleLight App",
+    "slug": "skyle-light",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.skylelight.app"
     },
     "android": {
+      "package": "com.skylelight.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -21,7 +23,20 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2b393459-5f47-49af-9d39-e8f68843f62d"
+      }
+    },
+    "owner": "lucashedrixdev",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2b393459-5f47-49af-9d39-e8f68843f62d"
+    }
   }
 }

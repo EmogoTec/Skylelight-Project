@@ -1,25 +1,13 @@
 import React, { useState } from 'react';
-import { Text, View, ScrollView, TouchableOpacity, Image, Modal, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity, Image, Modal, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Phone, Lock, Eye, EyeOff, Check, ArrowRight, Fingerprint, UserPlus } from 'lucide-react-native';
+import { Phone, Lock, Eye, EyeOff, Check, ArrowRight, UserPlus } from 'lucide-react-native';
 import { theme } from '../theme/theme';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import AuthBackground from '../components/AuthBackground';
 import { authStyles } from '../styles/authStyles';
-import * as LocalAuthentication from 'expo-local-authentication';
-
-let AsyncStorage = {
-  setItem: async () => {},
-  getItem: async () => null,
-  removeItem: async () => {}
-};
-
-try {
-  AsyncStorage = require('@react-native-async-storage/async-storage').default;
-} catch (e) {
-  console.log('AsyncStorage fallback enabled.');
-}
+import { authAPI, storage } from '../services/api';
 
 export default function LoginScreen({ navigation }) {
   const [identifier, setIdentifier] = useState('');
@@ -29,38 +17,6 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const handleBiometricLogin = async () => {
-    setError('');
-    try {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-
-      if (!hasHardware || !isEnrolled) {
-        setError('Biometrics not available or not enrolled on this device.');
-        return;
-      }
-
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Sign into SkyleLight',
-        fallbackLabel: 'Use Passcode',
-        disableDeviceFallback: false,
-      });
-
-      if (result.success) {
-        setLoading(true);
-        // Simulate a tiny network delay for realism
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        await AsyncStorage.setItem('userToken', 'skylelight_secure_token_biometric');
-        navigation.replace('Dashboard');
-      } else {
-        setError('Authentication cancelled or failed.');
-      }
-    } catch (e) {
-      setError('An error occurred during biometric authentication.');
-      console.log(e);
-    }
-  };
-
   const handlePasswordLogin = async () => {
     setError('');
     if (!identifier.trim() || !password) {
@@ -69,11 +25,21 @@ export default function LoginScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      await AsyncStorage.setItem('userToken', 'skylelight_token_auth');
-      navigation.replace('Dashboard');
+      // The backend expects phone in E.164 format or email
+      const loginIdentifier = identifier.startsWith('+') ? identifier : (identifier.includes('@') ? identifier : '+234' + identifier.replace(/^0/, ''));
+      
+      const response = await authAPI.login(loginIdentifier, password);
+      
+      if (response.status === 'success') {
+        await storage.saveToken(response.data.access_token);
+        await storage.saveUserData(response.data.user);
+        navigation.replace('Dashboard');
+      } else {
+        setError(response.message || 'Login failed. Please check your credentials.');
+      }
     } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -149,20 +115,6 @@ export default function LoginScreen({ navigation }) {
             loading={loading}
             rightIcon={<ArrowRight size={18} color={theme.colors.white} />}
           />
-
-          <TouchableOpacity 
-            style={authStyles.biometricButton} 
-            onPress={handleBiometricLogin}
-            disabled={loading}
-          >
-            <View style={authStyles.biometricIconBadge}>
-              <Fingerprint size={16} color={theme.colors.primary} />
-            </View>
-            <Text style={authStyles.biometricButtonText}>Continue with Biometrics</Text>
-            <View style={authStyles.secureBadgeTag}>
-              <Text style={authStyles.secureBadgeText}>Fast & Secure</Text>
-            </View>
-          </TouchableOpacity>
 
           <View style={authStyles.accountFooterDivider} />
           

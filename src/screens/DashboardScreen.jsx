@@ -2,24 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Animated, Easing, StatusBar, Image, Modal, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bell, LogOut, Megaphone, AlertTriangle, Eye, EyeOff, MapPin, Smartphone, CreditCard, Box, ChevronRight, PlusCircle, MinusCircle, Grid } from 'lucide-react-native';
+import { Bell, LogOut, Megaphone, AlertTriangle, Eye, EyeOff, MapPin, Smartphone, CreditCard, Box, ChevronRight, PlusCircle, MinusCircle, Store, User } from 'lucide-react-native';
 
 import { theme } from '../theme/theme';
 import { dashStyles } from '../styles/dashStyles';
 import ServiceCard from '../components/ServiceCard';
 import BottomNavItem from '../components/BottomNavItem';
-
-let AsyncStorage = {
-  setItem: async () => {},
-  getItem: async () => null,
-  removeItem: async () => {}
-};
-
-try {
-  AsyncStorage = require('@react-native-async-storage/async-storage').default;
-} catch (e) {
-  console.log('AsyncStorage fallback enabled.');
-}
+import { authAPI, walletAPI, storage } from '../services/api';
 
 export default function DashboardScreen({ navigation }) {
   const [balanceVisible, setBalanceVisible] = useState(false);
@@ -27,11 +16,14 @@ export default function DashboardScreen({ navigation }) {
   const insets = useSafeAreaInsets();
 
   const [user, setUser] = useState({
-    name: 'Omale Emmanuel',
-    initials: 'OE',
-    balance: '247,650.30',
+    name: '',
+    initials: '',
+    balance: '0.00',
     bonus: '0.00'
   });
+  
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const scrollAnim = useRef(new Animated.Value(0)).current;
 
@@ -45,6 +37,101 @@ export default function DashboardScreen({ navigation }) {
       })
     ).start();
   }, [scrollAnim]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      // Fetch user profile
+      const profileResponse = await authAPI.getProfile();
+      if (profileResponse.status === 'success') {
+        const userData = profileResponse.data.user;
+        const name = userData.name || 'User';
+        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        setUser(prev => ({ ...prev, name, initials }));
+      }
+
+      // Fetch wallet details and transactions
+      const walletResponse = await walletAPI.fetchDetails(10);
+      if (walletResponse.status === 'success') {
+        const details = walletResponse.data.details;
+        const walletTransactions = walletResponse.data.transactions || [];
+        
+        setUser(prev => ({ 
+          ...prev, 
+          balance: details.account_balance?.toLocaleString() || '0.00',
+          bonus: '0.00' // backend doesn't return bonus yet
+        }));
+
+        // Convert transactions to our format
+        const formattedTransactions = walletTransactions.map((tx, index) => {
+          const isCredit = tx.type === 'credit';
+          const iconMap = {
+            'Data Purchase': { icon: Box, bg: '#F3E5F5', color: '#7B1FA2' },
+            'Airtime Purchase': { icon: Smartphone, bg: '#E3F2FD', color: '#1565C0' },
+            'Wallet Top Up': { icon: PlusCircle, bg: '#E8F5E9', color: '#2E7D32' },
+            'Payment received': { icon: PlusCircle, bg: '#E8F5E9', color: '#2E7D32' },
+            'Electricity Bill': { icon: MapPin, bg: '#E0F7FA', color: '#00838F' },
+            'Internet Bill': { icon: MapPin, bg: '#E0F7FA', color: '#00838F' },
+            'New User Rewards': { icon: PlusCircle, bg: '#E8F5E9', color: '#2E7D32' },
+            'SkyleLight Games': { icon: Box, bg: '#F3E5F5', color: '#7B1FA2' },
+            'Account Topup': { icon: PlusCircle, bg: '#E8F5E9', color: '#2E7D32' },
+          };
+          const iconInfo = iconMap[tx.description] || { icon: Box, bg: '#F5F5F5', color: '#757575' };
+          
+          return {
+            id: String(index + 1),
+            icon: iconInfo.icon,
+            iconBg: iconInfo.bg,
+            iconColor: iconInfo.color,
+            title: tx.description,
+            subtitle: '',
+            date: tx.date,
+            amount: `${isCredit ? '+' : '-'}₦${Number(tx.amount).toLocaleString()}`,
+            amountColor: isCredit ? '#1AAE72' : '#E53E3E',
+            status: 'Success'
+          };
+        });
+        
+        setTransactions(formattedTransactions);
+      }
+    } catch (err) {
+      console.error('Dashboard fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fallback mock data for development
+  const mockTransactions = [
+    {
+      id: '1',
+      icon: MapPin,
+      iconBg: '#E0F7FA',
+      iconColor: '#00838F',
+      title: 'Electricity Bill',
+      subtitle: 'Aba Power',
+      date: 'Sep 08, 2026 • 10:24 AM',
+      amount: '-₦6,300',
+      amountColor: '#E53E3E',
+      status: 'Success'
+    },
+    {
+      id: '2',
+      icon: Smartphone,
+      iconBg: '#E3F2FD',
+      iconColor: '#1565C0',
+      title: 'Airtime Purchase',
+      subtitle: 'MTN 0803 456 7890',
+      date: 'Sep 07, 2026 • 03:15 PM',
+      amount: '-₦1,000',
+      amountColor: '#E53E3E',
+      status: 'Success'
+    },
+  ];
 
   return (
     <View style={dashStyles.container}>
@@ -104,9 +191,14 @@ export default function DashboardScreen({ navigation }) {
           style={dashStyles.walletCard}
         >
           <View style={dashStyles.walletHeaderRow}>
-            <Text style={dashStyles.walletSectionTitle}>Total Balance</Text>
-            <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={dashStyles.eyeToggleBtn}>
-              {balanceVisible ? <Eye size={18} color={theme.colors.white} /> : <EyeOff size={18} color={theme.colors.white} />}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={dashStyles.walletSectionTitle}>Total Balance</Text>
+              <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={dashStyles.eyeToggleBtn}>
+                {balanceVisible ? <Eye size={18} color={theme.colors.white} /> : <EyeOff size={18} color={theme.colors.white} />}
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={() => navigation.navigate('History')} style={dashStyles.historyTextBtn}>
+              <Text style={dashStyles.historyText}>History</Text>
             </TouchableOpacity>
           </View>
 
@@ -115,12 +207,12 @@ export default function DashboardScreen({ navigation }) {
           <View style={dashStyles.walletBalanceCols}>
             <View style={dashStyles.walletSubCol}>
               <Text style={dashStyles.walletSubLabel}>Wallet Balance</Text>
-              <Text style={dashStyles.walletSubValue}>₦{user.balance}</Text>
+              <Text style={dashStyles.walletSubValue}>{balanceVisible ? `₦${user.balance}` : "••••••••"}</Text>
             </View>
             <View style={dashStyles.walletColDivider} />
             <View style={dashStyles.walletSubCol}>
               <Text style={dashStyles.walletSubLabel}>Bonus Balance</Text>
-              <Text style={dashStyles.walletSubValue}>₦{user.bonus}</Text>
+              <Text style={dashStyles.walletSubValue}>{balanceVisible ? `₦${user.bonus}` : "••••••••"}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -145,68 +237,25 @@ export default function DashboardScreen({ navigation }) {
         <View style={dashStyles.recentTxContainer}>
           <View style={dashStyles.recentTxHeader}>
             <Text style={dashStyles.recentTxTitle}>Recent Transaction</Text>
-            <TouchableOpacity><Text style={dashStyles.recentTxSeeAll}>See All</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('SeeAll')}><Text style={dashStyles.recentTxSeeAll}>See All</Text></TouchableOpacity>
           </View>
 
-          <View style={dashStyles.txItem}>
-            <View style={[dashStyles.txIconWrapper, { backgroundColor: '#E0F7FA' }]}>
-              <MapPin size={20} color="#00838F" />
+          {(loading ? mockTransactions : transactions).slice(0, 2).map((tx) => (
+            <View key={tx.id} style={dashStyles.txItem}>
+              <View style={[dashStyles.txIconWrapper, { backgroundColor: tx.iconBg }]}>
+                <tx.icon size={20} color={tx.iconColor} />
+              </View>
+              <View style={dashStyles.txDetails}>
+                <Text style={dashStyles.txTitle}>{tx.title}</Text>
+                <Text style={dashStyles.txSubtitle}>{tx.subtitle}</Text>
+                <Text style={dashStyles.txDate}>{tx.date}</Text>
+              </View>
+              <View style={dashStyles.txAmountContainer}>
+                <Text style={[dashStyles.txAmountNegative, { color: tx.amountColor }]}>{tx.amount}</Text>
+                <View style={dashStyles.txStatusPill}><Text style={dashStyles.txStatusText}>{tx.status}</Text></View>
+              </View>
             </View>
-            <View style={dashStyles.txDetails}>
-              <Text style={dashStyles.txTitle}>Electricity Bill</Text>
-              <Text style={dashStyles.txSubtitle}>Aba Power</Text>
-              <Text style={dashStyles.txDate}>Sep 08, 2026 • 10:24 AM</Text>
-            </View>
-            <View style={dashStyles.txAmountContainer}>
-              <Text style={dashStyles.txAmountNegative}>-₦6,300</Text>
-              <View style={dashStyles.txStatusPill}><Text style={dashStyles.txStatusText}>Success</Text></View>
-            </View>
-          </View>
-
-          <View style={dashStyles.txItem}>
-            <View style={[dashStyles.txIconWrapper, { backgroundColor: '#E3F2FD' }]}>
-              <Smartphone size={20} color="#1565C0" />
-            </View>
-            <View style={dashStyles.txDetails}>
-              <Text style={dashStyles.txTitle}>Airtime Purchase</Text>
-              <Text style={dashStyles.txSubtitle}>MTN 0803 456 7890</Text>
-              <Text style={dashStyles.txDate}>Sep 07, 2026 • 03:15 PM</Text>
-            </View>
-            <View style={dashStyles.txAmountContainer}>
-              <Text style={dashStyles.txAmountNegative}>-₦1,000</Text>
-              <View style={dashStyles.txStatusPill}><Text style={dashStyles.txStatusText}>Success</Text></View>
-            </View>
-          </View>
-
-          <View style={dashStyles.txItem}>
-            <View style={[dashStyles.txIconWrapper, { backgroundColor: '#E8F5E9' }]}>
-              <PlusCircle size={20} color="#2E7D32" />
-            </View>
-            <View style={dashStyles.txDetails}>
-              <Text style={dashStyles.txTitle}>Wallet Top Up</Text>
-              <Text style={dashStyles.txSubtitle}>Paystack</Text>
-              <Text style={dashStyles.txDate}>Sep 07, 2026 • 11:20 AM</Text>
-            </View>
-            <View style={dashStyles.txAmountContainer}>
-              <Text style={dashStyles.txAmountPositive}>+₦10,000</Text>
-              <View style={dashStyles.txStatusPill}><Text style={dashStyles.txStatusText}>Success</Text></View>
-            </View>
-          </View>
-
-          <View style={dashStyles.txItem}>
-            <View style={[dashStyles.txIconWrapper, { backgroundColor: '#F3E5F5' }]}>
-              <Box size={20} color="#7B1FA2" />
-            </View>
-            <View style={dashStyles.txDetails}>
-              <Text style={dashStyles.txTitle}>Data Purchase</Text>
-              <Text style={dashStyles.txSubtitle}>MTN 2GB</Text>
-              <Text style={dashStyles.txDate}>Sep 06, 2026 • 07:42 PM</Text>
-            </View>
-            <View style={dashStyles.txAmountContainer}>
-              <Text style={dashStyles.txAmountNegative}>-₦2,000</Text>
-              <View style={dashStyles.txStatusPill}><Text style={dashStyles.txStatusText}>Success</Text></View>
-            </View>
-          </View>
+          ))}
         </View>
 
         <View style={dashStyles.servicesContainer}>
@@ -234,14 +283,9 @@ export default function DashboardScreen({ navigation }) {
 
       <View style={[dashStyles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 8), height: 64 + Math.max(insets.bottom, 8) }]}>
         <BottomNavItem iconName="Home" label="Home" isActive={activeTab === 'Home'} onPress={() => setActiveTab('Home')} />
-        <BottomNavItem iconName="Clock" label="History" isActive={activeTab === 'History'} onPress={() => setActiveTab('History')} />
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <TouchableOpacity style={dashStyles.centerTabButton} onPress={() => setActiveTab('Scan')}>
-            <Grid size={24} color={theme.colors.white} />
-          </TouchableOpacity>
-        </View>
+        <BottomNavItem iconName="Store" label="Merchant" isActive={activeTab === 'Merchant'} onPress={() => setActiveTab('Merchant')} />
         <BottomNavItem iconName="Headphones" label="Support" isActive={activeTab === 'Support'} onPress={() => setActiveTab('Support')} />
-        <BottomNavItem iconName="Settings" label="Settings" isActive={activeTab === 'Settings'} onPress={() => { setActiveTab('Settings'); navigation.navigate('Settings'); }} />
+        <BottomNavItem iconName="User" label="Profile" isActive={activeTab === 'Profile'} onPress={() => { setActiveTab('Profile'); navigation.navigate('Settings'); }} />
       </View>
     </View>
   );

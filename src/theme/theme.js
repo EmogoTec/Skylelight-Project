@@ -16,6 +16,12 @@ export const theme = {
     text: '#062B67',
     textLight: '#5F7898',
     transparent: 'transparent',
+
+    // Atmospheric tints for auth-screen backgrounds
+    skyWashDeep: '#C9EAF8',
+    skyWashMid: '#E4F5FC',
+    waveDeep: '#CDEBF8',
+    waveLight: '#E8F7FC',
   },
   typography: {
     fontFamily: {

@@ -6,6 +6,7 @@ import { theme } from '../theme/theme';
 import Button from '../components/Button';
 import AuthBackground from '../components/AuthBackground';
 import { authStyles } from '../styles/authStyles';
+import { authAPI } from '../services/api';
 
 export default function SignupPhoneScreen({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -19,9 +20,22 @@ export default function SignupPhoneScreen({ navigation }) {
       return;
     }
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setLoading(false);
-    navigation.navigate('SignupOtp', { phoneNumber });
+    try {
+      const formattedPhone = '+234' + phoneNumber.replace(/^0/, '');
+      
+      const response = await authAPI.sendOTP(formattedPhone);
+      
+      if (response.status === 'success') {
+        navigation.navigate('SignupOtp', { phoneNumber: formattedPhone });
+      } else {
+        setError(response.message || 'Failed to send OTP. Please try again.');
+      }
+    } catch (err) {
+      console.error('Send OTP error:', err);
+      setError(err.response?.data?.message || 'Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

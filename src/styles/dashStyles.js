@@ -35,9 +35,11 @@ export const dashStyles = StyleSheet.create({
   verifyButtonText: { color: theme.colors.white, fontSize: 12, fontFamily: theme.typography.fontFamily.bold },
   
   walletCard: { marginHorizontal: 18, marginTop: 14, borderRadius: theme.borderRadius.xl, padding: 20, shadowColor: theme.colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 6 },
-  walletHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  walletHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   walletSectionTitle: { fontSize: 13, color: theme.colors.cloudWhite, fontFamily: theme.typography.fontFamily.medium },
-  eyeToggleBtn: { padding: 4 },
+  eyeToggleBtn: { padding: 4, marginRight: 8 },
+  historyTextBtn: { paddingHorizontal: 8, paddingVertical: 4 },
+  historyText: { fontSize: 12, color: theme.colors.white, fontFamily: theme.typography.fontFamily.bold, opacity: 0.9 },
   
   mainBalanceText: { fontSize: 36, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.white, marginTop: 4, marginBottom: 20 },
   
@@ -97,9 +99,7 @@ export const dashStyles = StyleSheet.create({
   bottomNavTab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   bottomNavText: { fontSize: 10, color: theme.colors.textLight, marginTop: 4, fontFamily: theme.typography.fontFamily.medium },
   bottomNavTextActive: { color: theme.colors.primary, fontFamily: theme.typography.fontFamily.bold },
-  
-  centerTabButton: { width: 56, height: 56, borderRadius: 28, backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center', marginTop: -24, shadowColor: theme.colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 },
-  
+
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalContent: { width: '85%', maxWidth: 340, backgroundColor: theme.colors.white, borderRadius: theme.borderRadius.xl, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 8 },
   modalIconCircle: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#FFEBEE', justifyContent: 'center', alignItems: 'center', marginBottom: 14 },
@@ -109,5 +109,31 @@ export const dashStyles = StyleSheet.create({
   modalCancelBtn: { flex: 1, height: 44, borderRadius: 10, backgroundColor: theme.colors.iceBlue, justifyContent: 'center', alignItems: 'center' },
   modalCancelText: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.navy },
   modalConfirmBtn: { flex: 1, height: 44, borderRadius: 10, backgroundColor: '#E53E3E', justifyContent: 'center', alignItems: 'center' },
-  modalConfirmText: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.white }
+  modalConfirmText: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.white },
+
+  monthSelectorContainer: { paddingHorizontal: 18, marginTop: 14 },
+  monthSelectorBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.white, padding: 14, borderRadius: theme.borderRadius.lg, borderWidth: 1, borderColor: theme.colors.border },
+  monthSelectorText: { fontSize: 14, fontFamily: theme.typography.fontFamily.medium, color: theme.colors.navy },
+
+  filterChipsContainer: { paddingHorizontal: 18, marginTop: 12, gap: 8 },
+  filterChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.border },
+  filterChipActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  filterChipText: { fontSize: 12, fontFamily: theme.typography.fontFamily.medium, color: theme.colors.navy },
+  filterChipTextActive: { color: theme.colors.white },
+
+  emptyState: { alignItems: 'center', paddingVertical: 40, paddingHorizontal: 20 },
+  emptyStateText: { fontSize: 16, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.navy, marginBottom: 4 },
+  emptyStateSub: { fontSize: 13, color: theme.colors.textLight, textAlign: 'center' },
+
+  filterModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  filterModalContent: { backgroundColor: theme.colors.white, borderTopLeftRadius: theme.borderRadius.xl, borderTopRightRadius: theme.borderRadius.xl, padding: 20, maxHeight: '70%' },
+  filterModalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, borderBottomWidth: 1, borderBottomColor: theme.colors.border, paddingBottom: 16 },
+  filterModalTitle: { fontSize: 18, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.navy },
+  filterModalClose: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.primary },
+  filterSection: { marginBottom: 24 },
+  filterSectionTitle: { fontSize: 14, fontFamily: theme.typography.fontFamily.bold, color: theme.colors.navy, marginBottom: 12 },
+  filterOption: { paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  filterOptionActive: { backgroundColor: theme.colors.iceBlue },
+  filterOptionText: { fontSize: 15, fontFamily: theme.typography.fontFamily.medium, color: theme.colors.navy },
+  filterOptionTextActive: { color: theme.colors.primary, fontFamily: theme.typography.fontFamily.bold },
 });
